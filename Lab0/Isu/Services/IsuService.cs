@@ -14,7 +14,7 @@ public class IsuService : IIsuService
     {
         var group = new Group(name);
         if (_listOfGroups.Contains(group))
-            throw new GroupException("Group with such name already exists!");
+            throw new GroupException("Group with such name already exists");
         _listOfGroups.Add(group);
         return group;
     }
@@ -30,62 +30,44 @@ public class IsuService : IIsuService
     public Student GetStudent(int id)
     {
         Student required = _listOfStudents.Find(student => student.Id == id) ??
-                           throw new StudentException("Not found!");
+                           throw new StudentException("Not found");
         return required;
     }
 
     public Student? FindStudent(int id)
     {
-        foreach (Student student in _listOfStudents)
-        {
-            if (student.Id == id)
-                return student;
-        }
-
-        return null;
+        return _listOfStudents.FirstOrDefault(student => student.Id == id);
     }
 
-    public List<Student> FindStudents(GroupName groupName)
+    public IReadOnlyList<Student>? FindStudents(GroupName groupName)
     {
-        foreach (Group group in _listOfGroups)
-        {
-            if (group.GetName() == groupName)
-                return group.GetStudents();
-        }
-
-        throw new StudentException("Not found!");
+        return (from @group in _listOfGroups where @group.GetName() == groupName select @group.GetStudents())
+            .FirstOrDefault();
     }
 
-    public List<Student> FindStudents(CourseNumber courseNumber)
+    public IReadOnlyList<Student>? FindStudents(CourseNumber courseNumber)
     {
-        List<Student> required = _listOfStudents.FindAll(student => student.Group.GetCourse() == courseNumber) ??
-                               throw new GroupException("Not found!");
-        return required;
+        IReadOnlyList<Student> required = _listOfStudents.FindAll(student => student.Group.GetCourse() == courseNumber);
+        return required ?? null;
     }
 
     public Group? FindGroup(GroupName groupName)
     {
-        foreach (Group group in _listOfGroups)
-        {
-            if (group.GetName() == groupName)
-                return group;
-        }
-
-        return null;
+        return _listOfGroups.FirstOrDefault(group => group.GetName() == groupName);
     }
 
-    public List<Group> FindGroups(CourseNumber courseNumber)
+    public IReadOnlyList<Group>? FindGroups(CourseNumber courseNumber)
     {
-        List<Group> required = _listOfGroups.FindAll(group => group.GetCourse() == courseNumber) ??
-                               throw new GroupException("Not found!");
-        return required;
+        IReadOnlyList<Group> required = _listOfGroups.FindAll(group => group.GetCourse() == courseNumber);
+        return required ?? null;
     }
 
-    public void ChangeStudentGroup(Student student, Group newGroup)
+    public void ChangeStudentGroup(Student? student, Group? newGroup)
     {
-        Group oldGroup = student.Group;
-        newGroup.AddStudent(student);
-        oldGroup.RemoveStudent(student);
-        student.Group = newGroup;
+        if (student is null) return;
+        if (newGroup is null) return;
+        if (newGroup.GetName().GetCourse() != student.Group.GetName().GetCourse())
+            throw new GroupException("This transfer is not possible");
+        student.ChangeGroup(newGroup);
     }
 }

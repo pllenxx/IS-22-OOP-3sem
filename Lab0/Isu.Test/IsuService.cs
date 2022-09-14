@@ -38,7 +38,7 @@ public class IsuService
     public void TransferStudentToAnotherGroup_GroupChanged()
     {
         var oldGroup = _service.AddGroup(new GroupName("M3111"));
-        var newGroup = _service.AddGroup(new GroupName("M32011"));
+        var newGroup = _service.AddGroup(new GroupName("M3101"));
         var student = _service.AddStudent(oldGroup, "Xenia Vasyutina");
         _service.ChangeStudentGroup(student, newGroup);
         Assert.Contains(student, newGroup.GetStudents());

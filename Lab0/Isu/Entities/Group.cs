@@ -7,61 +7,48 @@ namespace Isu.Entities;
 public class Group
 {
     private const int _maxAmountOfStudentsInGroup = 25;
-    private GroupName _nameOfTheGroup;
+    private GroupName _name;
     private CourseNumber _course;
-    private List<Student> _listOfStudentsInOneGroup;
-    private int _amountOfStudents;
+    private List<Student> _listOfStudents;
 
     public Group(GroupName name)
     {
-        _nameOfTheGroup = name;
-        _amountOfStudents = 0;
+        _name = name;
         _course = new CourseNumber(name.GetCourse());
-        _listOfStudentsInOneGroup = new List<Student>();
+        _listOfStudents = new List<Student>();
     }
 
-    public Group(GroupName name, int numberOfStudents)
+    /*public Group(GroupName name, int numberOfStudents)
     {
         if (numberOfStudents > _maxAmountOfStudentsInGroup)
             throw new GroupException("This number of students is not allowed in one group!");
-        _nameOfTheGroup = name;
-        _amountOfStudents = numberOfStudents;
+        _name = name;
         _course = new CourseNumber(name.GetCourse());
-        _listOfStudentsInOneGroup = new List<Student>();
-    }
+        _listOfStudents = new List<Student>();
+    }*/
 
-    public Group AddStudent(Student newStudent)
+    public Group AddStudent(Student? newStudent)
     {
-        if (++_amountOfStudents > _maxAmountOfStudentsInGroup)
-            throw new GroupException("This number of students is not allowed in one group!");
-        _listOfStudentsInOneGroup.Add(newStudent);
+        if (newStudent is null)
+            throw new StudentException("There is no one to add to the group");
+        if (_listOfStudents.Count + 1 > _maxAmountOfStudentsInGroup)
+            throw new GroupException("Number of students per group exceeded");
+        _listOfStudents.Add(newStudent);
         return this;
     }
 
-    public Group RemoveStudent(Student student)
+    public Group RemoveStudent(Student? student)
     {
-        _listOfStudentsInOneGroup.Remove(student);
-        _amountOfStudents--;
+        if (student is null)
+            throw new StudentException("There is no one to remove from the group");
+        _listOfStudents.Remove(student);
         return this;
     }
 
-    public int GetMaxAmount()
-    {
-        return _maxAmountOfStudentsInGroup;
-    }
+    public int GetMaxAmount() => _maxAmountOfStudentsInGroup;
+    public GroupName GetName() => _name;
 
-    public GroupName GetName()
-    {
-        return _nameOfTheGroup;
-    }
+    public IReadOnlyList<Student> GetStudents() => _listOfStudents;
 
-    public List<Student> GetStudents()
-    {
-        return _listOfStudentsInOneGroup;
-    }
-
-    public CourseNumber GetCourse()
-    {
-        return _course;
-    }
+    public CourseNumber GetCourse() => _course;
 }

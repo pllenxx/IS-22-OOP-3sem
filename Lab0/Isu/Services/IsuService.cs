@@ -40,8 +40,7 @@ public class IsuService : IIsuService
 
     public IReadOnlyList<Student>? FindStudents(GroupName groupName)
     {
-        return (from @group in _listOfGroups where @group.GetName() == groupName select @group.GetStudents())
-            .FirstOrDefault();
+        return (IReadOnlyList<Student>?)_listOfGroups.Where(g => g.GetName() == groupName).SelectMany(g => g.GetStudents());
     }
 
     public IReadOnlyList<Student> FindStudents(CourseNumber courseNumber)

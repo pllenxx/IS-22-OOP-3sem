@@ -22,7 +22,7 @@ public class Group
     {
         if (newStudent is null)
             throw new StudentException("There is no one to add to the group");
-        if (_listOfStudents.Count + 1 > _maxAmountOfStudentsInGroup)
+        if (_listOfStudents.Count == _maxAmountOfStudentsInGroup)
             throw new GroupException("Number of students per group exceeded");
         _listOfStudents.Add(newStudent);
         return this;

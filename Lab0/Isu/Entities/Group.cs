@@ -13,21 +13,12 @@ public class Group
 
     public Group(GroupName name)
     {
-        _name = name;
+        _name = name ?? throw new GroupException("Name of this does not exist");
         _course = new CourseNumber(name.GetCourse());
         _listOfStudents = new List<Student>();
     }
 
-    /*public Group(GroupName name, int numberOfStudents)
-    {
-        if (numberOfStudents > _maxAmountOfStudentsInGroup)
-            throw new GroupException("This number of students is not allowed in one group!");
-        _name = name;
-        _course = new CourseNumber(name.GetCourse());
-        _listOfStudents = new List<Student>();
-    }*/
-
-    public Group AddStudent(Student? newStudent)
+    public Group AddStudent(Student newStudent)
     {
         if (newStudent is null)
             throw new StudentException("There is no one to add to the group");
@@ -37,7 +28,7 @@ public class Group
         return this;
     }
 
-    public Group RemoveStudent(Student? student)
+    public Group RemoveStudent(Student student)
     {
         if (student is null)
             throw new StudentException("There is no one to remove from the group");

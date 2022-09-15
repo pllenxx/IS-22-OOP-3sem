@@ -8,7 +8,7 @@ public class GroupName
     private const int _maxNameLength = 6;
     private string _name;
 
-    public GroupName(string? name)
+    public GroupName(string name)
     {
         if (string.IsNullOrEmpty(name))
             throw new GroupException("Group name does not exist");

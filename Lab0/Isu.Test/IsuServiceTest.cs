@@ -8,9 +8,9 @@ using Xunit;
 
 namespace Isu.Test;
 
-public class IsuService
+public class IsuServiceTest
 {
-    private Services.IsuService _service = new Services.IsuService();
+    private IsuService _service = new IsuService();
     [Fact]
     public void AddStudentToGroup_StudentHasGroupAndGroupContainsStudent()
     {

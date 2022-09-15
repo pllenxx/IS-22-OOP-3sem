@@ -13,7 +13,7 @@ public class IsuService : IIsuService
     public Group AddGroup(GroupName name)
     {
         var group = new Group(name);
-        if (_listOfGroups.Contains(group))
+        if (_listOfGroups.Any(g => g.GetName() == name))
             throw new GroupException("Group with such name already exists");
         _listOfGroups.Add(group);
         return group;
@@ -29,9 +29,8 @@ public class IsuService : IIsuService
 
     public Student GetStudent(int id)
     {
-        Student required = _listOfStudents.Find(student => student.Id == id) ??
+        return _listOfStudents.Find(student => student.Id == id) ??
                            throw new StudentException("Not found");
-        return required;
     }
 
     public Student? FindStudent(int id)
@@ -45,10 +44,9 @@ public class IsuService : IIsuService
             .FirstOrDefault();
     }
 
-    public IReadOnlyList<Student>? FindStudents(CourseNumber courseNumber)
+    public IReadOnlyList<Student> FindStudents(CourseNumber courseNumber)
     {
-        IReadOnlyList<Student> required = _listOfStudents.FindAll(student => student.Group.GetCourse() == courseNumber);
-        return required ?? null;
+        return _listOfStudents.FindAll(student => student.Group.GetCourse() == courseNumber);
     }
 
     public Group? FindGroup(GroupName groupName)
@@ -58,14 +56,13 @@ public class IsuService : IIsuService
 
     public IReadOnlyList<Group>? FindGroups(CourseNumber courseNumber)
     {
-        IReadOnlyList<Group> required = _listOfGroups.FindAll(group => group.GetCourse() == courseNumber);
-        return required ?? null;
+        return _listOfGroups.FindAll(group => group.GetCourse() == courseNumber);
     }
 
-    public void ChangeStudentGroup(Student? student, Group? newGroup)
+    public void ChangeStudentGroup(Student student, Group newGroup)
     {
-        if (student is null) return;
-        if (newGroup is null) return;
+        ArgumentNullException.ThrowIfNull(student);
+        ArgumentNullException.ThrowIfNull(newGroup);
         if (newGroup.GetName().GetCourse() != student.Group.GetName().GetCourse())
             throw new GroupException("This transfer is not possible");
         student.ChangeGroup(newGroup);

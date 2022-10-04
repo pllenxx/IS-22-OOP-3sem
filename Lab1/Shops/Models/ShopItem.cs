@@ -6,11 +6,13 @@ namespace Shops.Models;
 
 public class ShopItem
 {
+    private const int MinAmountOfProductsInShop = 0;
+    private const decimal MinCostForProduct = 0;
     public ShopItem(Product product, int quantity, decimal price, Shop shop)
     {
-        if (quantity < 0)
+        if (quantity < MinAmountOfProductsInShop)
             throw new ProductException("Quantity cannot be less than 0");
-        if (price < 0)
+        if (price < MinCostForProduct)
             throw new ProductException("Price cannot be less than 0");
         Product = product;
         Quantity = quantity;
@@ -18,8 +20,28 @@ public class ShopItem
         CurrentShop = shop;
     }
 
-    public decimal CurrentPrice { get; set; }
-    public int Quantity { get; set; }
     public Product Product { get; }
     public Shop CurrentShop { get; }
+    private decimal CurrentPrice { get; set; }
+    private int Quantity { get; set; }
+
+    public int GetQuantity()
+    {
+        return Quantity;
+    }
+
+    public void SetQuantity(int amount)
+    {
+        Quantity = amount;
+    }
+
+    public decimal GetPrice()
+    {
+        return CurrentPrice;
+    }
+
+    public void SetPrice(decimal price)
+    {
+        CurrentPrice = price;
+    }
 }

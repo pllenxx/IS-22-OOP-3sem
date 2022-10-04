@@ -19,9 +19,9 @@ public class ShopsTest
         _shopManager.Shipment(product1, shop, 32, 4);
         _shopManager.Shipment(product2, shop, 20, 100);
         Assert.Contains(product1, shop.GetProductsTypes());
-        Assert.True(shop.GetProducts()[0].Quantity == 4);
+        Assert.True(shop.Products[0].GetQuantity() == 4);
         Assert.Contains(product2, shop.GetProductsTypes());
-        Assert.True(shop.GetProducts()[1].Quantity == 100);
+        Assert.True(shop.Products[1].GetQuantity() == 100);
         Assert.DoesNotContain(product3, shop.GetProductsTypes());
     }
 
@@ -31,9 +31,9 @@ public class ShopsTest
         var shop = _shopManager.RegisterShop("Lenta", "Lomonosovskaya 9");
         var product = _shopManager.RegisterProduct("Kolbasa");
         _shopManager.Shipment(product, shop, 10, 3);
-        Assert.True(shop.GetProducts()[0].CurrentPrice == 10);
+        Assert.True(shop.Products[0].GetPrice() == 10);
         _shopManager.ChangeProductPrice(shop, product, 15);
-        Assert.True(shop.GetProducts()[0].CurrentPrice == 15);
+        Assert.True(shop.Products[0].GetPrice() == 15);
     }
 
     [Fact]
@@ -43,8 +43,16 @@ public class ShopsTest
         var shop2 = _shopManager.RegisterShop("Another Magnit", "Chaikovskogo 229");
         var product1 = _shopManager.RegisterProduct("Sol'");
         var product2 = _shopManager.RegisterProduct("Saxar");
+        var product3 = _shopManager.RegisterProduct("Tomato");
+        var product4 = _shopManager.RegisterProduct("Cucucmber");
         _shopManager.Shipment(product1, shop1, 1000000, 4);
         _shopManager.Shipment(product1, shop2, 2, 100);
+        _shopManager.Shipment(product3, shop1, 25, 7);
+        _shopManager.Shipment(product4, shop1, 20, 6);
+        _shopManager.Shipment(product3, shop2, 100, 7);
+        _shopManager.Shipment(product4, shop2, 110, 6);
+        var products = new List<Product>() { product3, product4 };
+        Assert.Equal(_shopManager.FindShopWithLowestPrices(products), shop1);
         Assert.Equal(_shopManager.FindShopWithLowestPrices(product1, 2), shop2);
         Assert.Throws<ShopException>(() => _shopManager.FindShopWithLowestPrices(product2, 10000));
     }
@@ -53,15 +61,26 @@ public class ShopsTest
     public void BuyProducts()
     {
         var shop = _shopManager.RegisterShop("Dicksi", "Birzhevaya linia 14");
-        var product = _shopManager.RegisterProduct("Toys");
+        var product1 = _shopManager.RegisterProduct("Toys");
         var customer1 = _shopManager.RegisterCustomer("Sveta Kpop", 50);
-        _shopManager.Shipment(product, shop, 7, 100);
-        _shopManager.Purchase(shop, customer1, product, 3);
-        Assert.Contains(product, customer1.GetCustomerProducts());
-        Assert.True(customer1.Money == 50 - 21);
-        Assert.True(shop.GetQuantityOfProduct(product) == 97);
-        Assert.True(shop.Money == 21);
+        Assert.Throws<ShopException>(() => _shopManager.RegisterShop("Diksi Imposter", "Birzhevaya linia 14"));
+        _shopManager.Shipment(product1, shop, 7, 100);
+        _shopManager.Purchase(shop, customer1, product1, 3);
+        var product2 = _shopManager.RegisterProduct("Candy");
+        Assert.Contains(product1, customer1.GetCustomerProducts());
+        Assert.True(customer1.GetMoney() == 50 - 21);
+        Assert.True(shop.GetQuantityOfProduct(product1) == 97);
+        Assert.True(shop.GetShopMoney() == 21);
         var customer2 = _shopManager.RegisterCustomer("Btbks", 2);
-        Assert.Throws<CustomerException>(() => _shopManager.Purchase(shop, customer2, product, 1));
+        Assert.Throws<CustomerException>(() => _shopManager.Purchase(shop, customer2, product1, 1));
+        _shopManager.Shipment(product2, shop, 10, 34);
+        var products = new List<Product>() { product1, product2 };
+        var customer3 = _shopManager.RegisterCustomer("Andrik", 100);
+        _shopManager.Purchase(shop, customer3, products);
+        Assert.Contains(product1, customer3.GetCustomerProducts());
+        Assert.True(customer3.GetMoney() == 100 - 7 - 10);
+        Assert.True(shop.GetQuantityOfProduct(product1) == 96);
+        Assert.True(shop.GetQuantityOfProduct(product2) == 33);
+        Assert.True(shop.GetShopMoney() == 38);
     }
 }

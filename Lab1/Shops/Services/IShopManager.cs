@@ -22,5 +22,9 @@ public interface IShopManager
 
     void Purchase(Shop shop, Customer customer, Product product, int quantity);
 
+    void Purchase(Shop shop, Customer customer, List<Product> products);
+
     Shop? FindShopWithLowestPrices(Product product, int quantity);
+
+    Shop? FindShopWithLowestPrices(List<Product> products);
 }

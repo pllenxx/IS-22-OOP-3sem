@@ -9,14 +9,14 @@ namespace Isu.Extra.Services;
 
 public class IsuExtra : IIsuExtra
 {
-    private List<StudentWithOGNP> _students;
+    private List<StudentWithOgnp> _students;
     private List<Ognp> _registeredOgnp;
     private List<Megafaculty> _megafaculties;
     private List<GroupInFaculty> _groups;
 
     public IsuExtra()
     {
-        _students = new List<StudentWithOGNP>();
+        _students = new List<StudentWithOgnp>();
         _registeredOgnp = new List<Ognp>();
         _megafaculties = new List<Megafaculty>();
         _groups = new List<GroupInFaculty>();
@@ -27,7 +27,7 @@ public class IsuExtra : IIsuExtra
         if (string.IsNullOrWhiteSpace(name))
             throw new MegafacultyException("Invalid magefaculty name input");
         var megafaculty = new Megafaculty(name);
-        if (_megafaculties.Contains(megafaculty))
+        if (megafaculty.AlreadyRegistered(_megafaculties))
         {
             throw new MegafacultyException("Such megafaculty is already registered");
         }
@@ -47,7 +47,7 @@ public class IsuExtra : IIsuExtra
         if (string.IsNullOrWhiteSpace(secondSubject))
             throw new OgnpSubjectException("Second stream name is incorrect");
         Ognp newOgnp = new Ognp(name, faculty);
-        if (_registeredOgnp.Any(ognp => ognp == newOgnp))
+        if (newOgnp.Exists(_registeredOgnp))
         {
             throw new OgnpException("Such OGNP is already registered");
         }
@@ -62,17 +62,23 @@ public class IsuExtra : IIsuExtra
     public GroupInFaculty AddGroupInFaculty(GroupName name, Megafaculty megafaculty)
     {
         var newGroup = new GroupInFaculty(name, megafaculty);
-        if (_groups.Contains(newGroup))
+        if (newGroup.AlreadyRegistered(_groups))
+        {
             throw new GroupException("Such group is already registered");
+        }
+
         _groups.Add(newGroup);
         return newGroup;
     }
 
-    public StudentWithOGNP AddStudent(string name, GroupInFaculty groupInFaculty, Megafaculty megafaculty)
+    public StudentWithOgnp AddStudent(string name, GroupInFaculty groupInFaculty, Megafaculty megafaculty)
     {
-        var student = new StudentWithOGNP(name, groupInFaculty, megafaculty);
-        if (_students.Contains(student))
+        var student = new StudentWithOgnp(name, groupInFaculty, megafaculty);
+        if (student.AlreadyRegistered(_students))
+        {
             throw new StudentException("Such student is already registered");
+        }
+
         groupInFaculty.AddStudent(student);
         _students.Add(student);
         return student;
@@ -107,7 +113,7 @@ public class IsuExtra : IIsuExtra
         stream.AddNewLesson(lesson);
     }
 
-    public void ChooseOgnp(StudentWithOGNP student, Ognp ognp)
+    public void ChooseOgnp(StudentWithOgnp student, Ognp ognp)
     {
         if (student.Ognp is null)
         {
@@ -119,26 +125,31 @@ public class IsuExtra : IIsuExtra
         }
     }
 
-    public void DeleteEntry(StudentWithOGNP student)
+    public void DeleteEntry(StudentWithOgnp student)
     {
         if (student is null)
             throw new StudentException("Student input is incorrect");
         student.CancelOgnp();
     }
 
-    public (IReadOnlyList<Stream> list1, IReadOnlyList<Stream> list2) GetGroupsByOgnp(Ognp ognp)
+    public IReadOnlyList<Stream> GetGroupsOfFirstSubjectByOgnp(Ognp ognp)
     {
-        return (ognp.Subjects[0].Stream.AsReadOnly(), ognp.Subjects[1].Stream.AsReadOnly());
+        return ognp.Subjects[0].Streams;
     }
 
-    public IEnumerable<StudentWithOGNP> GetStudentsWithRequiredOgnp(Ognp ognp)
+    public IReadOnlyList<Stream> GetGroupsOfSecondSubjectByOgnp(Ognp ognp)
+    {
+        return ognp.Subjects[1].Streams;
+    }
+
+    public IEnumerable<StudentWithOgnp> GetStudentsWithRequiredOgnp(Ognp ognp)
     {
         if (ognp is null)
             throw new OgnpException("There is no ognp to get students");
-        return ognp.Subjects[0].Stream.SelectMany(stream => stream.Students);
+        return ognp.Subjects[0].Streams.SelectMany(stream => stream.Students);
     }
 
-    public IEnumerable<StudentWithOGNP> GetStudentsWithoutOgnp(Megafaculty faculty)
+    public IEnumerable<StudentWithOgnp> GetStudentsWithoutOgnp(Megafaculty faculty)
     {
         if (faculty is null)
             throw new MegafacultyException("Invalid megafaculty input");

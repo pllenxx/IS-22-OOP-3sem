@@ -51,4 +51,11 @@ public class Lesson
 
     public TimePeriod Period { get; }
     public string Day { get; }
+
+    protected internal bool CheckIntersections(IReadOnlyList<Lesson> lessons)
+    {
+        if (lessons is null)
+            throw new LessonException("Invalid lesson list input");
+        return lessons.Any(lesson => Day == lesson.Day && Period == lesson.Period);
+    }
 }

@@ -10,7 +10,26 @@ public class IsuExtraTest
     private IsuExtra _isuExtra = new IsuExtra();
 
     [Fact]
-    public void AddOgnpToStudent_StudentHasOgnp()
+    public void AddLessonsToOgnp_OgnpHasLessons()
+    {
+        var megafaculty = _isuExtra.AddMegafaculty("BTINS");
+        var ognp = _isuExtra.AddNewOgnp("ОГНП БТиНСа", megafaculty, "Неустойчивое развитие", "Правильно кушаем", 5);
+        var firstStream = _isuExtra.AddStreamToOgnp("1.1", ognp, 1);
+        var secondStream = _isuExtra.AddStreamToOgnp("1.2", ognp, 2);
+        var firstLesson1 = new Lesson(firstStream, new TimePeriod("11:40 AM", "1:10 PM"), "Усталый Артем", 228, "Понедельник");
+        var secondLesson1 = new Lesson(firstStream, new TimePeriod("1:30 PM", "3:00 PM"), "Усталый Артем", 228, "Понедельник");
+        var firstLesson2 = new Lesson(secondStream, new TimePeriod("8:20 AM", "9:50 AM"), "Ослиный Андрей", 993, "Суббота");
+        var secondLesson2 = new Lesson(secondStream, new TimePeriod("10:00 AM", "11:30 AM"), "Ослиный Андрей", 993, "Суббота");
+        _isuExtra.AddLessonToStream(firstLesson1, firstStream);
+        _isuExtra.AddLessonToStream(secondLesson1, firstStream);
+        _isuExtra.AddLessonToStream(firstLesson2, secondStream);
+        _isuExtra.AddLessonToStream(secondLesson2, secondStream);
+        Assert.Contains(firstLesson1, firstStream.Lessons);
+        Assert.Contains(firstLesson2, secondStream.Lessons);
+    }
+
+    [Fact]
+    public void ChooseOgnp_OgnpHasStudent()
     {
         var firstMegafaculty = _isuExtra.AddMegafaculty("TINT");
         var group = _isuExtra.AddGroupInFaculty(new GroupName("M32091"), firstMegafaculty);
@@ -19,23 +38,20 @@ public class IsuExtraTest
         var ognp = _isuExtra.AddNewOgnp("ОГНП БТиНСа", secondMegafaculty, "Неустойчивое развитие", "Правильно кушаем", 5);
         var firstStream = _isuExtra.AddStreamToOgnp("1.1", ognp, 1);
         var secondStream = _isuExtra.AddStreamToOgnp("1.2", ognp, 2);
-        var firstLesson1 = new Lesson(firstStream, new TimePeriod("11:40 AM", "1:10 PM"), "Усталый Артем", 228, "Понедельник");
-        var secondLesson1 = new Lesson(firstStream, new TimePeriod("1:30 PM", "3:00 PM"), "Усталый Артем", 228, "Понедельник");
-        var firstLesson2 = new Lesson(secondStream, new TimePeriod("8:20 AM", "9:50 AM"), "Ослиный Андрей", 993, "Суббота");
-        var secondLesson2 = new Lesson(secondStream, new TimePeriod("10:00 AM", "11:30 AM"), "Ослиный Андрей", 993, "Суббота");
-        var mainLesson = new Lesson(group, new TimePeriod("10:00 AM", "11:30 AM"), "Маятин Александр", 123, "Вторник");
-        _isuExtra.AddLessonToStream(firstLesson1, firstStream);
-        _isuExtra.AddLessonToStream(secondLesson1, firstStream);
-        _isuExtra.AddLessonToStream(firstLesson2, secondStream);
-        _isuExtra.AddLessonToStream(secondLesson2, secondStream);
-        Assert.Contains(firstLesson1, firstStream.Lessons);
-        _isuExtra.AddLessonToFacultyGroup(mainLesson, group);
         _isuExtra.ChooseOgnp(student, ognp);
         Assert.Equal(ognp, student.Ognp);
         Assert.Contains(student, firstStream.Students);
         Assert.Contains(student, secondStream.Students);
-        var ognp2 = _isuExtra.AddNewOgnp("ОГНП ТИНТА", secondMegafaculty, "ООП", "ОСИ", 3);
-        Assert.Throws<StudentException>(() => _isuExtra.ChooseOgnp(student, ognp2));
+    }
+
+    [Fact]
+    public void StudentCannotChooseOgnpFromHisMegafaculty()
+    {
+        var megafaculty = _isuExtra.AddMegafaculty("TINT");
+        var group = _isuExtra.AddGroupInFaculty(new GroupName("M32091"), megafaculty);
+        var student = _isuExtra.AddStudent("Elf dar", group, megafaculty);
+        var ognp = _isuExtra.AddNewOgnp("ОГНП ТИнТА", megafaculty, "Много прогаем", "Решаем математику", 3);
+        Assert.Throws<StudentException>(() => _isuExtra.ChooseOgnp(student, ognp));
     }
 
     [Fact]
@@ -99,7 +115,6 @@ public class IsuExtraTest
         var ognp = _isuExtra.AddNewOgnp("ОГНП ФТ МФ", secondMegafaculty, "Что-то физическое", "Что-то физическое, но другое", 1);
         var student1 = _isuExtra.AddStudent("Ulya", group, firstMegafaculty);
         var student2 = _isuExtra.AddStudent("Meneme", group, firstMegafaculty);
-        var student3 = _isuExtra.AddStudent("Gosha", group, firstMegafaculty);
         var firstStream = _isuExtra.AddStreamToOgnp("4.1", ognp, 1);
         var secondStream = _isuExtra.AddStreamToOgnp("4.2", ognp, 2);
         var firstLesson1 = new Lesson(firstStream, new TimePeriod("11:40 AM", "1:10 PM"), "Зинчик", 666, "Понедельник");
@@ -115,7 +130,30 @@ public class IsuExtraTest
         var required = _isuExtra.GetStudentsWithRequiredOgnp(ognp);
         Assert.Contains(student1, required);
         Assert.Contains(student2, required);
-        var required2 = _isuExtra.GetStudentsWithoutOgnp(firstMegafaculty);
-        Assert.Contains(student3, required2);
+    }
+
+    [Fact]
+    public void GetStudentsWhoDoesntHaveOgnp()
+    {
+        var firstMegafaculty = _isuExtra.AddMegafaculty("TINT");
+        var group = _isuExtra.AddGroupInFaculty(new GroupName("M33001"), firstMegafaculty);
+        var secondMegafaculty = _isuExtra.AddMegafaculty("FT");
+        var ognp = _isuExtra.AddNewOgnp("ОГНП ФТ МФ", secondMegafaculty, "Что-то физическое", "Что-то физическое, но другое", 1);
+        var student1 = _isuExtra.AddStudent("Ulya", group, firstMegafaculty);
+        var student2 = _isuExtra.AddStudent("Pasha", group, firstMegafaculty);
+        var firstStream = _isuExtra.AddStreamToOgnp("4.1", ognp, 1);
+        var secondStream = _isuExtra.AddStreamToOgnp("4.2", ognp, 2);
+        var firstLesson1 = new Lesson(firstStream, new TimePeriod("11:40 AM", "1:10 PM"), "Зинчик", 666, "Понедельник");
+        var secondLesson1 = new Lesson(firstStream, new TimePeriod("1:30 PM", "3:00 PM"), "Зинчик", 666, "Понедельник");
+        var firstLesson2 = new Lesson(secondStream, new TimePeriod("8:20 AM", "9:50 AM"), "Наира", 100, "Пятница");
+        var secondLesson2 = new Lesson(secondStream, new TimePeriod("10:00 AM", "11:30 AM"), "Наира", 100, "Пятница");
+        _isuExtra.AddLessonToStream(firstLesson1, firstStream);
+        _isuExtra.AddLessonToStream(secondLesson1, firstStream);
+        _isuExtra.AddLessonToStream(firstLesson2, secondStream);
+        _isuExtra.AddLessonToStream(secondLesson2, secondStream);
+        _isuExtra.ChooseOgnp(student1, ognp);
+        var required = _isuExtra.GetStudentsWithoutOgnp(firstMegafaculty);
+        Assert.Contains(student2, required);
+        Assert.DoesNotContain(student1, required);
     }
 }

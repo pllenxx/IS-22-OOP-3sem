@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Security;
 using Isu.Entities;
 using Isu.Extra.Tools;
@@ -9,11 +10,10 @@ namespace Isu.Extra;
 public class Stream
 {
     private const int MaxAmountOfStudents = 30;
-    private Guid _id;
     private string _name;
     private OgnpSubject _subject;
     private Ognp _ognp;
-    private List<StudentWithOGNP> _students;
+    private List<StudentWithOgnp> _students;
     private List<Lesson> _schedule;
     private int _amountOfStudents;
 
@@ -21,16 +21,19 @@ public class Stream
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new GroupException("Invalid input of group name");
-        _id = Guid.NewGuid();
+        if (subject is null)
+            throw new OgnpException("Invalid subject input");
+        if (ognp is null)
+            throw new OgnpException("Invalid ognp input");
         _name = name;
-        _students = new List<StudentWithOGNP>();
+        _students = new List<StudentWithOgnp>();
         _schedule = new List<Lesson>();
         _amountOfStudents = 0;
         _subject = subject;
         _ognp = ognp;
     }
 
-    public IReadOnlyList<StudentWithOGNP> Students => _students;
+    public IReadOnlyList<StudentWithOgnp> Students => _students;
     public IReadOnlyList<Lesson> Lessons => _schedule;
 
     protected internal void AddNewLesson(Lesson lesson)
@@ -39,7 +42,7 @@ public class Stream
             throw new LessonException("Invalid lesson input");
         if (_schedule.Contains(lesson))
             throw new OgnpException("This stream already has this lesson");
-        if (_schedule.Any(registeredLesson => lesson.Day == registeredLesson.Day && lesson.Period == registeredLesson.Period))
+        if (lesson.CheckIntersections(Lessons))
         {
             throw new LessonException("This lesson intersects with the lesson in the stream");
         }
@@ -52,7 +55,7 @@ public class Stream
         return _amountOfStudents < MaxAmountOfStudents;
     }
 
-    protected internal Stream AddStudent(StudentWithOGNP student)
+    protected internal Stream AddStudent(StudentWithOgnp student)
     {
         if (student is null)
             throw new StudentException("No student to add to the stream");
@@ -64,7 +67,7 @@ public class Stream
         return this;
     }
 
-    protected internal void RemoveStudent(StudentWithOGNP student)
+    protected internal void RemoveStudent(StudentWithOgnp student)
     {
         if (student is null)
             throw new StudentException("Invalid student input");

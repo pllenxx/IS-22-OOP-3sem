@@ -9,31 +9,10 @@ public class TimePeriod
 
     public TimePeriod(string start, string end)
     {
-        try
-        {
-             _start = DateTime.Parse(start);
-        }
-        catch (FormatException)
-        {
+        if (!DateTime.TryParse(start, out _start))
             throw new TimeException("Start of the lesson is incorrect");
-        }
-        catch (OverflowException)
-        {
-            throw new TimeException("Start of the lesson is incorrect");
-        }
-
-        try
-        {
-            _end = DateTime.Parse(end);
-        }
-        catch (FormatException)
-        {
+        if (!DateTime.TryParse(end, out _end))
             throw new TimeException("End of the lesson is incorrect");
-        }
-        catch (OverflowException)
-        {
-            throw new TimeException("End of the lesson is incorrect");
-        }
 
         if (_end - _start != TimeSpan.Parse("1:30:00"))
             throw new TimeException("Lesson must be 90 minutes long");

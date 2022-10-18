@@ -3,7 +3,7 @@ using Isu.Extra.Tools;
 using Isu.Tools;
 namespace Isu.Extra;
 
-public class StudentWithOGNP : Student
+public class StudentWithOgnp : Student
 {
     private Ognp? _chosenOgnp;
     private Megafaculty _faculty;
@@ -11,13 +11,15 @@ public class StudentWithOGNP : Student
     private Stream? _firstGroup;
     private Stream? _secondGroup;
 
-    public StudentWithOGNP(string name, GroupInFaculty group, Megafaculty faculty)
+    public StudentWithOgnp(string name, GroupInFaculty group, Megafaculty faculty)
         : base(name, group)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new StudentException("Student's name cannot be null");
         if (group is null)
             throw new StudentException("Invalid group input");
+        if (faculty is null)
+            throw new StudentException("Invalid faculty input");
         _mainGroup = group;
         _faculty = faculty;
         _chosenOgnp = null;
@@ -37,12 +39,15 @@ public class StudentWithOGNP : Student
             throw new OgnpException("Invalid OGNP input");
         if (ognp.Faculty == _faculty)
             throw new StudentException("Student cannot choose OGNP of his megafaculty");
-        int flag1 = (from @group in ognp.Subjects[0].Stream from lesson1 in @group.Lessons from lesson2 in GroupInFaculty.Lessons where lesson1.Day == lesson2.Day && lesson1.Period == lesson2.Period select lesson1).Count();
-        if (flag1 == ognp.Subjects[0].Stream.Count)
-            throw new OgnpException("Student's schedule has intersections with OGNP schedule");
 
-        int flag2 = (from @group in ognp.Subjects[1].Stream from lesson1 in @group.Lessons from lesson2 in GroupInFaculty.Lessons where lesson1.Day == lesson2.Day && lesson1.Period == lesson2.Period select lesson1).Count();
-        if (flag2 == ognp.Subjects[1].Stream.Count)
+        var amountOfStreamsWithIntersections1 = ognp.Subjects[0].Streams.SelectMany(stream => stream.Lessons).Count(lesson => lesson.CheckIntersections(GroupInFaculty.Lessons));
+        if (amountOfStreamsWithIntersections1 == ognp.Subjects[0].Streams.Count)
+        {
+            throw new OgnpException("Student's schedule has intersections with OGNP schedule");
+        }
+
+        var amountOfStreamsWithIntersections2 = ognp.Subjects[1].Streams.SelectMany(stream => stream.Lessons).Count(lesson => lesson.CheckIntersections(GroupInFaculty.Lessons));
+        if (amountOfStreamsWithIntersections2 == ognp.Subjects[1].Streams.Count)
         {
             throw new OgnpException("Student's schedule has intersections with OGNP schedule");
         }
@@ -54,13 +59,15 @@ public class StudentWithOGNP : Student
 
         _chosenOgnp = ognp;
 
-        foreach (var group in ognp.Subjects[0].Stream.Where(group => group.CheckFullness()))
+        var selectedGroupsFirstSubject = ognp.Subjects[0].Streams.Where(group => group.CheckFullness());
+        foreach (var group in selectedGroupsFirstSubject)
         {
             _firstGroup = group.AddStudent(this);
             break;
         }
 
-        foreach (var group in ognp.Subjects[1].Stream.Where(group => group.CheckFullness()))
+        var selectedGroupsSecondSubject = ognp.Subjects[1].Streams.Where(group => group.CheckFullness());
+        foreach (var group in selectedGroupsSecondSubject)
         {
             _secondGroup = group.AddStudent(this);
             break;
@@ -72,5 +79,12 @@ public class StudentWithOGNP : Student
         _chosenOgnp = null;
         _firstGroup?.RemoveStudent(this);
         _secondGroup?.RemoveStudent(this);
+    }
+
+    protected internal bool AlreadyRegistered(List<StudentWithOgnp> registeredStudents)
+    {
+        if (registeredStudents is null)
+            throw new StudentException("Invalid student list input");
+        return registeredStudents.Any(student => student == this);
     }
 }

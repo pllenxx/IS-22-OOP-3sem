@@ -5,7 +5,7 @@ namespace Isu.Extra;
 public class Megafaculty
 {
     private int _id;
-    private List<StudentWithOGNP> _students;
+    private List<StudentWithOgnp> _students;
     private List<GroupInFaculty> _groups;
 
     public Megafaculty(string faculty)
@@ -22,17 +22,15 @@ public class Megafaculty
         }
 
         _groups = new List<GroupInFaculty>();
-        _students = new List<StudentWithOGNP>();
+        _students = new List<StudentWithOgnp>();
     }
 
-    protected internal enum Megafaculties
+    public IReadOnlyList<StudentWithOgnp> StudentWithOgnp => _students;
+
+    protected internal bool AlreadyRegistered(List<Megafaculty> registeredMegafaculties)
     {
-        KTU = 1,
-        TINT,
-        FT,
-        BTINS,
-        FTMI,
+        if (registeredMegafaculties is null)
+            throw new MegafacultyException("Invalid megafaculty list input");
+        return registeredMegafaculties.Any(megafaculty => megafaculty == this);
     }
-
-    public IReadOnlyList<StudentWithOGNP> StudentWithOgnp => _students;
 }

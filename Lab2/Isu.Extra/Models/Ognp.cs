@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using Isu.Extra.Tools;
 
 namespace Isu.Extra;
@@ -11,6 +12,8 @@ public class Ognp
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new OgnpException("Invalid input of OGNP name");
+        if (faculty is null)
+            throw new MegafacultyException("Invalid megafaculty input");
         _name = name;
         _subjects = new List<OgnpSubject>(2);
         Faculty = faculty;
@@ -25,5 +28,12 @@ public class Ognp
             throw new OgnpSubjectException("Invalid input of subjects");
         _subjects.Add(first);
         _subjects.Add(second);
+    }
+
+    protected internal bool Exists(List<Ognp> registeredOgnp)
+    {
+        if (registeredOgnp is null)
+            throw new OgnpException("Invalid OGNP list input");
+        return registeredOgnp.Any(ognp => ognp == this);
     }
 }

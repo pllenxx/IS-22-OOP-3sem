@@ -10,7 +10,7 @@ public interface IIsuExtra
 
     GroupInFaculty AddGroupInFaculty(GroupName name, Megafaculty megafaculty);
 
-    StudentWithOGNP AddStudent(string name, GroupInFaculty groupInFaculty, Megafaculty megafaculty);
+    StudentWithOgnp AddStudent(string name, GroupInFaculty groupInFaculty, Megafaculty megafaculty);
 
     Stream AddStreamToOgnp(string name, Ognp ognp, int numberOfSubject);
 
@@ -18,13 +18,15 @@ public interface IIsuExtra
 
     void AddLessonToStream(Lesson lesson, Stream stream);
 
-    void ChooseOgnp(StudentWithOGNP student, Ognp ognp);
+    void ChooseOgnp(StudentWithOgnp student, Ognp ognp);
 
-    void DeleteEntry(StudentWithOGNP student);
+    void DeleteEntry(StudentWithOgnp student);
 
-    (IReadOnlyList<Stream> list1, IReadOnlyList<Stream> list2) GetGroupsByOgnp(Ognp ognp);
+    IReadOnlyList<Stream> GetGroupsOfFirstSubjectByOgnp(Ognp ognp);
 
-    IEnumerable<StudentWithOGNP> GetStudentsWithRequiredOgnp(Ognp ognp);
+    IReadOnlyList<Stream> GetGroupsOfSecondSubjectByOgnp(Ognp ognp);
 
-    IEnumerable<StudentWithOGNP> GetStudentsWithoutOgnp(Megafaculty faculty);
+    IEnumerable<StudentWithOgnp> GetStudentsWithRequiredOgnp(Ognp ognp);
+
+    IEnumerable<StudentWithOgnp> GetStudentsWithoutOgnp(Megafaculty faculty);
 }

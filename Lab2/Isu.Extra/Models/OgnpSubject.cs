@@ -4,6 +4,8 @@ namespace Isu.Extra;
 
 public class OgnpSubject
 {
+    private const int MinAmountOfStreams = 1;
+    private const int MaxAmountOfStreams = 5;
     private string _name;
     private List<Stream> _groups;
     private Ognp _ognp;
@@ -12,12 +14,16 @@ public class OgnpSubject
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new OgnpSubjectException("Invalid input of stream name");
+        if (ognp is null)
+            throw new OgnpException("Invalid OGNP input");
+        if (amountOfStreams is < MinAmountOfStreams or > MaxAmountOfStreams)
+            throw new OgnpException("Not enough streams");
         _name = name;
         _groups = new List<Stream>(amountOfStreams);
         _ognp = ognp;
     }
 
-    public List<Stream> Stream => _groups;
+    public IReadOnlyList<Stream> Streams => _groups;
 
     protected internal void AddStreams(Stream stream)
     {
@@ -30,8 +36,8 @@ public class OgnpSubject
 
     protected internal bool CheckAvailableSpaces()
     {
-        int flag = _groups.Count(group => group.CheckFullness());
+        int availableSpaces = _groups.Count(group => group.CheckFullness());
 
-        return flag == _groups.Count;
+        return availableSpaces == _groups.Count;
     }
 }

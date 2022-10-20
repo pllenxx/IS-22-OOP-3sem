@@ -9,6 +9,7 @@ public class OgnpSubject
     private string _name;
     private List<Stream> _groups;
     private Ognp _ognp;
+    private int _amountOfStreams;
 
     public OgnpSubject(string name, Ognp ognp, int amountOfStreams)
     {
@@ -21,6 +22,7 @@ public class OgnpSubject
         _name = name;
         _groups = new List<Stream>(amountOfStreams);
         _ognp = ognp;
+        _amountOfStreams = amountOfStreams;
     }
 
     public IReadOnlyList<Stream> Streams => _groups;
@@ -31,6 +33,8 @@ public class OgnpSubject
             throw new OgnpSubjectException("Invalid stream input");
         if (_groups.Contains(stream))
             throw new OgnpSubjectException("This subjects already contains this stream");
+        if (_amountOfStreams++ > MaxAmountOfStreams)
+            throw new OgnpException("This subject does not have free spaces");
         _groups.Add(stream);
     }
 

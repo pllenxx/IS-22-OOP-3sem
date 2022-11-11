@@ -52,8 +52,7 @@ public class BackupTask
         restorePoint.AddStorages(storages);
         var archiver = new ZipArchiver();
         byte[] content = archiver.GetContent(storages);
-        dir.CreateSubdirectory(restorePointPath);
-        _backup.AddRestorePoint(restorePoint);
+        _repository.CreateDirectory(restorePointPath, content);
         return restorePoint;
     }
 

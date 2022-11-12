@@ -2,5 +2,5 @@ namespace Backups.Services;
 
 public interface IStorageAlgorithm
 {
-    IEnumerable<Storage> Save(string path, IEnumerable<BackupObject> objects);
+    List<Storage> Save(BackupTask task);
 }

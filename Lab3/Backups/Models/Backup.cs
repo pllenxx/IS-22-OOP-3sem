@@ -4,7 +4,7 @@ namespace Backups;
 
 public class Backup : IBackup
 {
-    private ICollection<RestorePoint> _restorePoints;
+    private List<RestorePoint> _restorePoints;
 
     public Backup()
     {

@@ -5,20 +5,23 @@ namespace Backups;
 
 public class SplitSaver : IStorageAlgorithm
 {
-    public IEnumerable<Storage> Save(string path, IEnumerable<BackupObject> objects)
+    public List<Storage> Save(BackupTask task)
     {
-        if (string.IsNullOrEmpty(path))
-            throw new BackupException("Invalid restore point path input");
-        if (!objects.Any())
+        if (!task.Objects.Any())
             throw new BackupException("Nothing to backup");
         var storages = new List<Storage>();
-        foreach (var obj in objects)
+        foreach (var obj in task.Objects)
         {
-            IEnumerable<BackupObject> objectToAdd = new[] { obj };
-            var storage = new Storage(obj.Path, objectToAdd);
+            var archiver = new ZipArchiver();
+            IReadOnlyList<BackupObject> objectToZip = new[] { obj };
+            List<byte[]> bytes = new List<byte[]>(1);
+            var content = archiver.GetContent(objectToZip);
+            bytes.Add(content);
+            var storage = new Storage($"Archive_{Guid.NewGuid()}.zip", bytes);
+            storage.AddObject(obj);
             storages.Add(storage);
         }
 
-        return storages.AsEnumerable();
+        return storages;
     }
 }

@@ -8,27 +8,25 @@ namespace Backups;
 
 public class FileSystemRepository : IRepository
 {
-    public FileSystemRepository()
+    private PhysicalFileSystem _fs;
+    public FileSystemRepository(PhysicalFileSystem fs)
     {
+        _fs = fs;
     }
 
-    public void CreateDirectory(string path, byte[] content)
+    public void CreateDirectory(string path, IEnumerable<Storage> storages)
     {
-        if (path is null)
-            throw new BackupException("Directory path is null");
-        var fs = new PhysicalFileSystem();
-        fs.CreateDirectory(path);
-        fs.WriteAllBytes(path, content);
-    }
-
-    public void AddToRepository(string objectPath, string repositoryPath)
-    {
-        if (objectPath is null)
-            throw new BackupException("Object path is null");
-        if (repositoryPath is null)
-            throw new BackupException("Directory path is null");
-        var fs = new PhysicalFileSystem();
-        byte[] content = fs.ReadAllBytes(objectPath);
-        fs.WriteAllBytes(repositoryPath, content);
+        if (string.IsNullOrEmpty(path))
+            throw new BackupException("Invalid directory path input");
+        if (!storages.Any())
+            throw new BackupException("Unable to create a directory with zero storages");
+        _fs.CreateDirectory(path);
+        foreach (var storage in storages)
+        {
+            foreach (var byteArray in storage.Bytes)
+            {
+                 _fs.WriteAllBytes(Path.Combine(path, storage.Path), byteArray);
+            }
+        }
     }
 }

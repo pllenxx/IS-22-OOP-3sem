@@ -5,17 +5,23 @@ namespace Backups;
 
 public class SingleSaver : IStorageAlgorithm
 {
-    public IEnumerable<Storage> Save(string path, IEnumerable<BackupObject> objects)
+    public List<Storage> Save(BackupTask task)
     {
-        if (string.IsNullOrEmpty(path))
-            throw new BackupException("Invalid restore point path input");
-        if (!objects.Any())
+        if (!task.Objects.Any())
             throw new BackupException("Nothing to backup");
         var storages = new List<Storage>(1);
-        var id = Guid.NewGuid();
-        var storagePath = Path.Combine(path, $"Archive{id}.zip");
-        var storage = new Storage(storagePath, objects);
+        var archiver = new ZipArchiver();
+        List<byte[]> filesContent = task.Objects.Select(obj => new[] { obj }).Select(objectToZip => archiver.GetContent(objectToZip)).ToList();
+
+        var storage = new Storage($"Archive_{Guid.NewGuid()}.zip", filesContent);
+
+        foreach (var obj in task.Objects)
+        {
+            storage.AddObject(obj);
+        }
+
         storages.Add(storage);
-        return storages.AsEnumerable();
+
+        return storages;
     }
 }

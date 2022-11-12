@@ -4,27 +4,25 @@ namespace Backups;
 
 public class RestorePoint
 {
-    private static int _id = 1;
-    private DateTime _timeOfCreation;
-    private IEnumerable<Storage> _storages;
+    private ICollection<Storage> _storages;
 
-    public RestorePoint(string path, DateTime time)
+    public RestorePoint(DateTime time, ICollection<Storage> storages)
     {
-        if (string.IsNullOrEmpty(path))
-            throw new BackupException("Path is null");
-        _id = _id++;
-        _timeOfCreation = time;
-        Path = path;
-        _storages = new List<Storage>();
+        if (!storages.Any())
+            throw new BackupException("No storages to create a restore point");
+        TimeOfCreation = time;
+        Name = $"RestorePoint№{Guid.NewGuid()}";
+        _storages = storages;
     }
 
-    public string Path { get; }
+    public string Name { get; }
+    public DateTime TimeOfCreation { get;  }
 
     public void AddStorages(IEnumerable<Storage> storages)
     {
-        if (storages is null)
-            throw new Exception("Storages do not exist");
-        _storages = storages;
+        if (!storages.Any())
+            throw new BackupException("Nothing to add to restore point");
+        _storages = (ICollection<Storage>)storages;
         foreach (var storage in storages)
         {
             storage.SetPoint(this);

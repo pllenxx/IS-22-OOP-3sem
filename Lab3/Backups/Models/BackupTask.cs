@@ -1,4 +1,3 @@
-using System.Security.AccessControl;
 using Backups.Services;
 using Backups.Tools;
 
@@ -6,24 +5,26 @@ namespace Backups;
 
 public class BackupTask
 {
-    private string _name;
-    private ICollection<BackupObject> _objects;
-    private string _backupPath;
-    private IBackup _backup;
     private IStorageAlgorithm _algorithm = null!;
     private IRepository _repository = null!;
+    private string _backupPath;
 
-    public BackupTask(string name, string backupPath)
+    public BackupTask(string backupName, string path)
     {
-        if (string.IsNullOrEmpty(name))
+        if (string.IsNullOrEmpty(backupName))
             throw new BackupException("Incorrect backup task name");
-        if (string.IsNullOrEmpty(backupPath))
-            throw new BackupException("Incorrect backup task path");
-        _name = name;
-        _backupPath = backupPath;
-        _objects = new List<BackupObject>();
-        _backup = new Backup();
+        if (string.IsNullOrEmpty(path))
+            throw new BackupException("Invalid backup path input");
+        BackupName = backupName;
+        _backupPath = path;
+        Objects = new List<BackupObject>();
+        Backup = new Backup();
     }
+
+    public ICollection<BackupObject> Objects { get; private set; }
+    public IBackup Backup { get; }
+    public string BackupName { get; }
+    public Config Configuration { get; private set; } = null!;
 
     public void SetStorageAlgorithm(IStorageAlgorithm algorithm)
     {
@@ -39,28 +40,35 @@ public class BackupTask
         _repository = repository;
     }
 
-    public RestorePoint AddPoint(IEnumerable<BackupObject> objects)
+    public RestorePoint AddPoint()
     {
-        if (objects is null)
-            throw new BackupException("Nothing to backup");
-        _objects = (ICollection<BackupObject>)objects;
-        var id = Guid.NewGuid();
-        DirectoryInfo dir = Directory.CreateDirectory(_backupPath);
-        var restorePointPath = Path.Combine(_backupPath, $"RestorePoint{id}");
-        var restorePoint = new RestorePoint(restorePointPath, DateTime.Now);
-        IEnumerable<Storage> storages = _algorithm.Save(restorePointPath, objects);
+        List<Storage> storages = _algorithm.Save(this);
+        var restorePoint = new RestorePoint(DateTime.Now, storages);
         restorePoint.AddStorages(storages);
-        var archiver = new ZipArchiver();
-        byte[] content = archiver.GetContent(storages);
-        _repository.CreateDirectory(restorePointPath, content);
+        foreach (var storage in storages)
+        {
+            storage.SetPoint(restorePoint);
+        }
+
+        Backup.AddRestorePoint(restorePoint);
+        var directoryPath = Path.Combine(_backupPath, BackupName, restorePoint.Name);
+        _repository.CreateDirectory(directoryPath, storages.AsEnumerable());
+        var config = new Config(Backup, _algorithm, _repository);
+        Configuration = config;
         return restorePoint;
     }
 
-    public IEnumerable<BackupObject> RemoveObject(BackupObject backupObject)
+    public void AddObject(BackupObject backupObject)
+    {
+        if (backupObject is null)
+            throw new BackupException("Backup object does not exist");
+        Objects.Add(backupObject);
+    }
+
+    public void RemoveObject(BackupObject backupObject)
     {
         if (backupObject is null)
             throw new BackupException("Backup object is null");
-        _objects.Remove(backupObject);
-        return _objects;
+        Objects.Remove(backupObject);
     }
 }

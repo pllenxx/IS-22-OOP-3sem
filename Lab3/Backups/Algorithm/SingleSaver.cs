@@ -5,13 +5,13 @@ namespace Backups;
 
 public class SingleSaver : IStorageAlgorithm
 {
-    public List<Storage> Save(BackupTask task)
+    public IEnumerable<Storage> Save(BackupTask task)
     {
         if (!task.Objects.Any())
             throw new BackupException("Nothing to backup");
         var storages = new List<Storage>(1);
         var archiver = new ZipArchiver();
-        List<byte[]> filesContent = task.Objects.Select(obj => new[] { obj }).Select(objectToZip => archiver.GetContent(objectToZip)).ToList();
+        IReadOnlyList<byte[]> filesContent = task.Objects.Select(obj => new[] { obj }).Select(objectToZip => archiver.GetContent(objectToZip)).ToList().AsReadOnly();
 
         var storage = new Storage($"Archive_{Guid.NewGuid()}.zip", filesContent);
 

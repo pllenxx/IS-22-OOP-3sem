@@ -5,7 +5,7 @@ namespace Backups;
 
 public class SplitSaver : IStorageAlgorithm
 {
-    public List<Storage> Save(BackupTask task)
+    public IEnumerable<Storage> Save(BackupTask task)
     {
         if (!task.Objects.Any())
             throw new BackupException("Nothing to backup");
@@ -17,7 +17,7 @@ public class SplitSaver : IStorageAlgorithm
             List<byte[]> bytes = new List<byte[]>(1);
             var content = archiver.GetContent(objectToZip);
             bytes.Add(content);
-            var storage = new Storage($"Archive_{Guid.NewGuid()}.zip", bytes);
+            var storage = new Storage($"Archive_{Guid.NewGuid()}.zip", bytes.AsReadOnly());
             storage.AddObject(obj);
             storages.Add(storage);
         }

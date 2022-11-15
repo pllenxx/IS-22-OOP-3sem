@@ -6,7 +6,7 @@ public class BackupObject
 {
     public BackupObject(string path)
     {
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrWhiteSpace(path))
             throw new BackupException("Object must have path");
         Id = Guid.NewGuid();
         Path = path;

@@ -11,6 +11,8 @@ public class ZipArchiver
 
     public byte[] GetContent(IReadOnlyList<BackupObject> objects)
     {
+        if (!objects.Any())
+            throw new BackupException("Nothing to archive");
         using var memoryStream = new MemoryStream();
         using (var archive = new ZipArchive(memoryStream, mode: ZipArchiveMode.Create, true))
         {

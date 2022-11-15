@@ -4,9 +4,9 @@ namespace Backups;
 
 public class RestorePoint
 {
-    private ICollection<Storage> _storages;
+    private IEnumerable<Storage> _storages;
 
-    public RestorePoint(DateTime time, ICollection<Storage> storages)
+    public RestorePoint(DateTime time, IEnumerable<Storage> storages)
     {
         if (!storages.Any())
             throw new BackupException("No storages to create a restore point");
@@ -22,7 +22,7 @@ public class RestorePoint
     {
         if (!storages.Any())
             throw new BackupException("Nothing to add to restore point");
-        _storages = (ICollection<Storage>)storages;
+        _storages = storages;
         foreach (var storage in storages)
         {
             storage.SetPoint(this);

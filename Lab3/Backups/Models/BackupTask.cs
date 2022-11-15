@@ -11,9 +11,9 @@ public class BackupTask
 
     public BackupTask(string backupName, string path)
     {
-        if (string.IsNullOrEmpty(backupName))
+        if (string.IsNullOrWhiteSpace(backupName))
             throw new BackupException("Incorrect backup task name");
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrWhiteSpace(path))
             throw new BackupException("Invalid backup path input");
         BackupName = backupName;
         _backupPath = path;
@@ -42,7 +42,7 @@ public class BackupTask
 
     public RestorePoint AddPoint()
     {
-        List<Storage> storages = _algorithm.Save(this);
+        IEnumerable<Storage> storages = _algorithm.Save(this);
         var restorePoint = new RestorePoint(DateTime.Now, storages);
         restorePoint.AddStorages(storages);
         foreach (var storage in storages)
@@ -52,7 +52,7 @@ public class BackupTask
 
         Backup.AddRestorePoint(restorePoint);
         var directoryPath = Path.Combine(_backupPath, BackupName, restorePoint.Name);
-        _repository.CreateDirectory(directoryPath, storages.AsEnumerable());
+        _repository.CreateDirectory(directoryPath, storages);
         var config = new Config(Backup, _algorithm, _repository);
         Configuration = config;
         return restorePoint;

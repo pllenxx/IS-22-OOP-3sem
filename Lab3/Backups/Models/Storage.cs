@@ -8,9 +8,9 @@ public class Storage
     private RestorePoint _point = null!;
     private List<BackupObject> _backupObjects;
 
-    public Storage(string path, List<byte[]> bytes)
+    public Storage(string path, IReadOnlyList<byte[]> bytes)
     {
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrWhiteSpace(path))
             throw new BackupException("Storage address is incorrect");
         if (!bytes.Any())
             throw new BackupException("Content is empty");
@@ -20,7 +20,7 @@ public class Storage
     }
 
     public string Path { get; }
-    public List<byte[]> Bytes { get; }
+    public IReadOnlyList<byte[]> Bytes { get; }
 
     public void SetPoint(RestorePoint point)
     {

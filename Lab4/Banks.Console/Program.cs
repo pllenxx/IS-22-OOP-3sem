@@ -22,7 +22,7 @@ public static class Program
                     .Title("Choose account mode")
                     .AddChoices(new[]
                     {
-                        "Client mode", "Bank manager mode",
+                        "Client mode", "Bank manager mode", "Exit"
                     }));
             switch (framework)
             {
@@ -143,6 +143,7 @@ public static class Program
                                     }
                                 }
                             }
+
                             break;
                         case "Fill up account":
                             var id = Guid.Parse(AnsiConsole.Ask<string>("Enter your [green]account id[/]"));
@@ -405,6 +406,9 @@ public static class Program
                     }
 
                     break;
+
+                case "Exit":
+                    return;
             }
         }
     }

@@ -40,13 +40,6 @@ public class Bank : IObservable
     public IReadOnlyList<Transaction> Transactions => _transactions.AsReadOnly();
     public BankSettings GetSettings() => _settings;
 
-    public void AddClient(Client client)
-    {
-        if (client is null)
-            throw new BanksException("Unable to add null client");
-        _clients.Add(client);
-    }
-
     public IBankAccount CreateDepositAccount(Client client, decimal moneyToPut, DateTime start, int period)
     {
         if (client is null)
@@ -109,8 +102,6 @@ public class Bank : IObservable
         if (transaction is null)
             throw new BanksException("Nothing to add");
         _transactions.Add(transaction);
-        var centralBank = CentralBank.GetInstance();
-        centralBank.CheckTransaction(transaction);
     }
 
     public void ChangeConditionsForDebit(double newPercent)
@@ -161,7 +152,7 @@ public class Bank : IObservable
 
     public void UpdateAccounts(int days)
     {
-        for (int i = days; days >= 0; days--)
+        for (int i = days; days > 0; days--)
         {
             foreach (var account in _accounts)
             {

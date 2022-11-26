@@ -5,7 +5,7 @@ namespace Banks;
 public class PassportData
 {
     private const int SeriesLength = 4;
-    private const int NumberLength = 4;
+    private const int NumberLength = 6;
 
     private int _series;
     private int _number;

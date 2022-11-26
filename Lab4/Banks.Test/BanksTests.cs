@@ -71,16 +71,18 @@ public class BanksTests
         Bank registeredBank = centralBank.RegisterBank("Nyam-nyam", settings);
         IClientBuilder builder = new ClientBuilder();
         builder.SetName(new FullName("Mama", "Papa"));
-        Client client1 = builder.BuildClient();
-        var account1 = registeredBank.CreateDebitAccount(client1, 100);
-        account1.Withdraw(50);
-        account1.FillUp(300);
-        builder.SetName(new FullName("Papa", "Mama"));
-        var client2 = builder.BuildClient();
-        var account2 = registeredBank.CreateDebitAccount(client2, 200);
-        account1.Transfer(20, account2);
-        Assert.Equal(350, account1.Balance);
-        Assert.True(registeredBank.Transactions.Last().IsCanceled);
+        var client = builder.BuildClient();
+        var account = registeredBank.CreateDebitAccount(client, 60000);
+        centralBank.AddMoneyToAccount(account, 5000);
+        builder.SetName(new FullName("Vika", "Butcher"));
+        builder.SetAddress(new Address("Moskva", "Bumblebee", "228", 198206));
+        builder.SetPassport(new PassportData(8888, 999999));
+        var newClient = builder.BuildClient();
+        var newAcc = registeredBank.CreateDebitAccount(newClient, 1000000);
+        centralBank.ReduceMoneyFromAccount(newAcc, 100);
+        centralBank.TransferMoneyBetweenAccounts(account, newAcc, 2);
+        Assert.Equal(1000000 - 100, newAcc.Balance);
+        Assert.True(centralBank.Transactions.Last().IsCanceled);
     }
 
     [Fact]
@@ -116,17 +118,36 @@ public class BanksTests
             60000,
             7,
             100000,
-            12,
+            12.5,
             1500000000);
         Bank registeredBank = centralBank.RegisterBank("Sberspozhalusta", settings);
         IClientBuilder builder = new ClientBuilder();
         builder.SetName(new FullName("Polina", "Khartanovich"));
-        var client = builder.BuildClient();
-        registeredBank.CreateDebitAccount(client, 100000);
-        client.ConfirmSubscription();
+        var client1 = builder.BuildClient();
+        registeredBank.CreateDebitAccount(client1, 100000);
+        client1.ConfirmSubscription();
         registeredBank.ChangeConditionsForDebit(10);
-        registeredBank.CreateDepositAccount(client, 90000, DateTime.Now, 12);
+        registeredBank.CreateDepositAccount(client1, 90000, DateTime.Now, 12);
         registeredBank.ChangeLowPercentForDeposit(5);
-        Assert.True(client.Messages.Count == 2);
+        BankSettings newSettings = new BankSettings(
+            4,
+            5,
+            35000,
+            8,
+            60000,
+            9,
+            100000,
+            15,
+            1500000000);
+        Bank newRegisteredBank = centralBank.RegisterBank("Sbernezachto", newSettings);
+        newRegisteredBank.CreateCreditAccount(client1);
+        client1.ConfirmSubscription();
+        newRegisteredBank.ChangeCreditLimit(200000);
+        builder.SetName(new FullName("Dab", "Step"));
+        var client2 = builder.BuildClient();
+        newRegisteredBank.CreateDebitAccount(client2, 200000);
+        newRegisteredBank.ChangeConditionsForDebit(5);
+        Assert.True(client1.Messages.Count == 4);
+        Assert.True(client2.Messages.Count == 0);
     }
 }

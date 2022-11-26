@@ -46,32 +46,61 @@ public class CentralBank
         throw new BanksException("Account not found");
     }
 
-    public void CheckTransaction(Transaction transaction)
+    public void AddMoneyToAccount(IBankAccount account, decimal moneyToAdd)
     {
-        if (transaction is null)
-            throw new BanksException("Nothing to check");
-        if (transaction.Sender.Owner.CheckDoubtfulness() && transaction.Recipient is null)
+        if (account.IsTransactionPossible(account.Owner, null))
         {
-            CancelTransaction(transaction);
-        }
-        else if (transaction.Sender.Owner.CheckDoubtfulness() && transaction.Recipient is not null && transaction.Recipient.Owner.CheckDoubtfulness())
-        {
-            CancelTransaction(transaction);
+            Transaction transaction = new Transaction(Guid.NewGuid(), account, null, moneyToAdd);
+            account.FillUp(moneyToAdd);
+            _transactions.Add(transaction);
+            account.BankBelonging.AddTransaction(transaction);
         }
         else
         {
+            Transaction transaction = new Transaction(Guid.NewGuid(), account, null, moneyToAdd);
+            transaction.Cancel();
             _transactions.Add(transaction);
+            account.BankBelonging.AddTransaction(transaction);
         }
     }
 
-    public void CancelTransaction(Transaction transaction)
+    public void ReduceMoneyFromAccount(IBankAccount account, decimal moneyToTake)
     {
-        if (transaction is null)
-            throw new BanksException("Nothing to cancel");
-        transaction.Cancel();
-        transaction.Sender.FillUp(transaction.AmountOfMoney);
-        if (transaction.Recipient is not null)
-            transaction.Recipient.Withdraw(transaction.AmountOfMoney);
+        if (account.IsTransactionPossible(account.Owner, null))
+        {
+            Transaction transaction = new Transaction(Guid.NewGuid(), account, null, moneyToTake);
+            account.Withdraw(moneyToTake);
+            _transactions.Add(transaction);
+            account.BankBelonging.AddTransaction(transaction);
+        }
+        else
+        {
+            Transaction transaction = new Transaction(Guid.NewGuid(), account, null, moneyToTake);
+            transaction.Cancel();
+            _transactions.Add(transaction);
+            account.BankBelonging.AddTransaction(transaction);
+        }
+    }
+
+    public void TransferMoneyBetweenAccounts(IBankAccount accountSender, IBankAccount accountRecipient,  decimal moneyToTransfer)
+    {
+        if (accountSender.IsTransactionPossible(accountSender.Owner, accountRecipient.Owner))
+        {
+            Transaction transaction = new Transaction(Guid.NewGuid(), accountSender, accountRecipient, moneyToTransfer);
+            accountSender.Withdraw(moneyToTransfer);
+            accountRecipient.FillUp(moneyToTransfer);
+            _transactions.Add(transaction);
+            accountSender.BankBelonging.AddTransaction(transaction);
+            accountRecipient.BankBelonging.AddTransaction(transaction);
+        }
+        else
+        {
+            Transaction transaction = new Transaction(Guid.NewGuid(), accountSender, accountRecipient, moneyToTransfer);
+            transaction.Cancel();
+            _transactions.Add(transaction);
+            accountSender.BankBelonging.AddTransaction(transaction);
+            accountRecipient.BankBelonging.AddTransaction(transaction);
+        }
     }
 
     public void SkipTime(int days)

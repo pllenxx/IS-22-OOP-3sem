@@ -19,6 +19,18 @@ public class DebitAccount : IBankAccount
     public Client Owner { get; private set; }
     public decimal Balance => _money;
 
+    public bool IsTransactionPossible(Client owner, Client? recipient)
+    {
+        if (owner is null)
+            throw new BanksException("Account owner is null");
+        if (recipient is null)
+        {
+            return owner.CheckDoubtfulness();
+        }
+
+        return owner.CheckDoubtfulness() && recipient.CheckDoubtfulness();
+    }
+
     public void Withdraw(decimal moneyToTake)
     {
         if (moneyToTake <= MinAmountOfMoney)
@@ -45,7 +57,6 @@ public class DebitAccount : IBankAccount
             throw new BanksException("Too much money to take");
         _money -= moneyToTransfer;
         account.FillUp(moneyToTransfer);
-        BankBelonging.AddTransaction(new Transaction(this, account, moneyToTransfer));
     }
 
     public void AddPercent()

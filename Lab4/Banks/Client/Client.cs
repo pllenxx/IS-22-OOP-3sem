@@ -57,7 +57,7 @@ public class Client : IObserver
 
     public bool CheckDoubtfulness()
     {
-        return Passport is null;
+        return Passport is not null && _address is not null;
     }
 
     public void Update(IMessage message)

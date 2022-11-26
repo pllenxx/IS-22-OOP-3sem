@@ -4,27 +4,26 @@ namespace Banks;
 
 public class Transaction
 {
-    private Guid _id;
-    private bool _isCanceled;
-
-    public Transaction(IBankAccount sender, IBankAccount? recipient, decimal amountOfMoney)
+    public Transaction(Guid id, IBankAccount sender, IBankAccount? recipient, decimal amountOfMoney)
     {
         if (sender is null)
             throw new BanksException("Sender is null");
-        _id = Guid.NewGuid();
+        Id = id;
         Sender = sender;
         Recipient = recipient;
         AmountOfMoney = amountOfMoney;
-        _isCanceled = false;
+        IsCanceled = false;
     }
 
+    public Guid Id { get; private set; }
     public IBankAccount Sender { get; private set; }
     public IBankAccount? Recipient { get; private set; }
     public decimal AmountOfMoney { get; private set; }
 
-    public bool IsCanceled => _isCanceled;
+    public bool IsCanceled { get; private set; }
+
     public void Cancel()
     {
-        _isCanceled = true;
+        IsCanceled = true;
     }
 }

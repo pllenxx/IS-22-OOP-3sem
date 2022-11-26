@@ -27,6 +27,18 @@ public class DepositAccount : IBankAccount
     public Client Owner { get; private set; }
     public decimal Balance => _remainder;
 
+    public bool IsTransactionPossible(Client owner, Client? recipient)
+    {
+        if (owner is null)
+            throw new BanksException("Account owner is null");
+        if (recipient is null && owner.CheckDoubtfulness())
+        {
+            return false;
+        }
+
+        return recipient is not null && !recipient.CheckDoubtfulness() && !owner.CheckDoubtfulness();
+    }
+
     public void Withdraw(decimal moneyToTake)
     {
         if (moneyToTake <= MinAmountOfMoney)
@@ -36,7 +48,6 @@ public class DepositAccount : IBankAccount
         if (_opening.AddMonths(_term) < DateTime.Now)
             throw new BanksException("Unable to perform operation");
         _remainder -= moneyToTake;
-        BankBelonging.AddTransaction(new Transaction(this, null, moneyToTake));
     }
 
     public void FillUp(decimal moneyToTopOff)
@@ -44,7 +55,6 @@ public class DepositAccount : IBankAccount
         if (moneyToTopOff <= MinAmountOfMoney)
             throw new BanksException("Sum must be greater than 0");
         _remainder += moneyToTopOff;
-        BankBelonging.AddTransaction(new Transaction(this, null, moneyToTopOff));
     }
 
     public void Transfer(decimal moneyToTransfer, IBankAccount account)
@@ -57,7 +67,6 @@ public class DepositAccount : IBankAccount
             throw new BanksException("Unable to perform operation");
         _remainder -= moneyToTransfer;
         account.FillUp(moneyToTransfer);
-        BankBelonging.AddTransaction(new Transaction(this, account, moneyToTransfer));
     }
 
     public void AddPercent()

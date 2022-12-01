@@ -8,6 +8,8 @@ public class Transaction
     {
         if (sender is null)
             throw new BanksException("Sender is null");
+        if (amountOfMoney <= Constans.MinAmountOfMoney)
+            throw new BanksException("Nothing to transfer");
         Id = id;
         Sender = sender;
         Recipient = recipient;

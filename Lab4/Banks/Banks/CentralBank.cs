@@ -48,6 +48,10 @@ public class CentralBank
 
     public void AddMoneyToAccount(IBankAccount account, decimal moneyToAdd)
     {
+        if (account is null)
+            throw new BanksException("Account to add money is null");
+        if (moneyToAdd < Constans.MinAmountOfMoney)
+            throw new BanksException("Input larger sum");
         if (account.IsTransactionPossible(account.Owner, null))
         {
             Transaction transaction = new Transaction(Guid.NewGuid(), account, null, moneyToAdd);
@@ -66,6 +70,10 @@ public class CentralBank
 
     public void ReduceMoneyFromAccount(IBankAccount account, decimal moneyToTake)
     {
+        if (account is null)
+            throw new BanksException("Account to add money is null");
+        if (moneyToTake < Constans.MinAmountOfMoney)
+            throw new BanksException("Input larger sum");
         if (account.IsTransactionPossible(account.Owner, null))
         {
             Transaction transaction = new Transaction(Guid.NewGuid(), account, null, moneyToTake);
@@ -84,6 +92,12 @@ public class CentralBank
 
     public void TransferMoneyBetweenAccounts(IBankAccount accountSender, IBankAccount accountRecipient,  decimal moneyToTransfer)
     {
+        if (accountSender is null)
+            throw new BanksException("Account of sender is null");
+        if (accountRecipient is null)
+            throw new BanksException("Account of recipient is null");
+        if (moneyToTransfer < Constans.MinAmountOfMoney)
+            throw new BanksException("Input larger sum");
         if (accountSender.IsTransactionPossible(accountSender.Owner, accountRecipient.Owner))
         {
             Transaction transaction = new Transaction(Guid.NewGuid(), accountSender, accountRecipient, moneyToTransfer);
@@ -105,6 +119,8 @@ public class CentralBank
 
     public void SkipTime(int days)
     {
+        if (days < Constans.MinTerm)
+            throw new BanksException("Amount of days to skip must be at least 1");
         foreach (var bank in _banks)
         {
             bank.UpdateAccounts(days);

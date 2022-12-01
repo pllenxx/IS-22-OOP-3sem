@@ -6,8 +6,6 @@ namespace Banks;
 
 public class Bank : IObservable
 {
-    private const double MinPercent = 0;
-
     private Guid _id;
     private string _name;
     private decimal _bankMoney;
@@ -44,9 +42,11 @@ public class Bank : IObservable
     {
         if (client is null)
             throw new BanksException("Unable to create an account as client is null");
-        if (moneyToPut < 0)
+        if (moneyToPut < Constans.MinAmountOfMoney)
             throw new BanksException("Money to create an account is null");
-        if (period < 0)
+        if (start == DateTime.MinValue)
+            throw new BanksException("Something is wrong with the date of start");
+        if (period < Constans.MinTerm)
             throw new BanksException("Period of account is negative");
         BankAccountCreator creator = new DepositAccountCreator(this, client, moneyToPut, start, period);
         IBankAccount account = creator.CreateAccount();
@@ -66,7 +66,7 @@ public class Bank : IObservable
     {
         if (client is null)
             throw new BanksException("Unable to create an account as client is null");
-        if (moneyToPut < 0)
+        if (moneyToPut < Constans.MinAmountOfMoney)
             throw new BanksException("Money to create an account is null");
         BankAccountCreator creator = new DebitAccountCreator(this, client, moneyToPut);
         IBankAccount account = creator.CreateAccount();
@@ -106,52 +106,56 @@ public class Bank : IObservable
 
     public void ChangeConditionsForDebit(double newPercent)
     {
+        if (newPercent < Constans.MinDebitPercentage)
+            throw new BanksException("Percent is too small");
         _settings.UpdateDebitPercentage(newPercent);
         NotifyObservers(new MessageForUpdatingPercents());
     }
 
     public void ChangeLowPercentForDeposit(double newPercent)
     {
-        if (newPercent < 0)
-            throw new BanksException("Percent cannot be negative");
+        if (newPercent < Constans.MinLowDepositPercentage)
+            throw new BanksException("Percent is too small");
         _settings.UpdateLowDepositPercentage(newPercent);
         NotifyObservers(new MessageForUpdatingPercents());
     }
 
     public void ChangeAveragePercentForDeposit(double newPercent)
     {
-        if (newPercent < 0)
-            throw new BanksException("Percent cannot be negative");
+        if (newPercent < Constans.MinAverageDepositPercentage)
+            throw new BanksException("Percent is too small");
         _settings.UpdateAverageDepositPercentage(newPercent);
         NotifyObservers(new MessageForUpdatingPercents());
     }
 
     public void ChangeHighPercentForDeposit(double newPercent)
     {
-        if (newPercent < 0)
-            throw new BanksException("Percent cannot be negative");
+        if (newPercent < Constans.MinHighDepositPercentage)
+            throw new BanksException("Percent is too small");
         _settings.UpdateHighDepositPercentage(newPercent);
         NotifyObservers(new MessageForUpdatingPercents());
     }
 
     public void ChangeCreditLimit(decimal newLimit)
     {
-        if (newLimit < 0)
-            throw new BanksException("New money limit must be higher than 0");
+        if (newLimit < Constans.MinCreditLimit)
+            throw new BanksException("New money limit is too small");
         _settings.UpdateCreditLimit(newLimit);
         NotifyObservers(new MessageForCreditLimitChange());
     }
 
     public void ChangeCommissionForCreditUse(double newCommission)
     {
-        if (newCommission < 0)
-            throw new BanksException("Commission percent cannot be negative");
+        if (newCommission < Constans.MinCreditCommission)
+            throw new BanksException("Commission percent is too small");
         _settings.UpdateCommissionForCreditUse(newCommission);
         NotifyObservers(new MessageForCreditCommissionUpdating());
     }
 
     public void UpdateAccounts(int days)
     {
+        if (days < Constans.MinTerm)
+            throw new BanksException("Amount of days for account updating must be at least 1");
         for (int i = days; days > 0; days--)
         {
             foreach (var account in _accounts)
@@ -163,16 +167,22 @@ public class Bank : IObservable
 
     public void AddObserver(IObserver account)
     {
+        if (account is null)
+            throw new BanksException("No one to observe");
         _observers.Add(account);
     }
 
     public void RemoveObserver(IObserver account)
     {
+        if (account is null)
+            throw new BanksException("No one to remove");
         _observers.Remove(account);
     }
 
     public void NotifyObservers(IMessage message)
     {
+        if (message is null)
+            throw new BanksException("Nothing to send to observers");
         foreach (var observer in _observers)
         {
             observer.Update(message);

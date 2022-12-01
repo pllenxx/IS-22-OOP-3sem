@@ -62,6 +62,8 @@ public class Client : IObserver
 
     public void Update(IMessage message)
     {
+        if (message is null)
+            throw new BanksException("Nothing to add to client's messages");
         _messages.Add(message);
     }
 }

@@ -4,12 +4,14 @@ namespace Banks;
 
 public class CreditAccount : IBankAccount
 {
-    private const decimal MinAmountOfMoney = 0;
-
     private decimal _money;
     private double _comission;
     public CreditAccount(Bank bank, Client client)
     {
+        if (bank is null)
+            throw new BanksException("Bank for credit account is null");
+        if (client is null)
+            throw new BanksException("Client for credit account is null");
         Id = Guid.NewGuid();
         Owner = client;
         BankBelonging = bank;
@@ -36,9 +38,9 @@ public class CreditAccount : IBankAccount
 
     public void Withdraw(decimal moneyToTake)
     {
-        if (moneyToTake <= MinAmountOfMoney)
+        if (moneyToTake <= Constans.MinAmountOfMoney)
             throw new BanksException("Sum must be greater than 0");
-        if (_money < 0)
+        if (_money < Constans.MinAmountOfMoney)
             _money = _money - moneyToTake - (_money * (decimal)_comission / 365);
         else
             _money -= moneyToTake;
@@ -46,20 +48,20 @@ public class CreditAccount : IBankAccount
 
     public void FillUp(decimal moneyToTopOff)
     {
-        if (moneyToTopOff <= MinAmountOfMoney)
+        if (moneyToTopOff <= Constans.MinAmountOfMoney)
             throw new BanksException("Sum must be greater than 0");
         _money += moneyToTopOff;
     }
 
     public void Transfer(decimal moneyToTransfer, IBankAccount account)
     {
-        if (moneyToTransfer <= MinAmountOfMoney)
+        if (moneyToTransfer <= Constans.MinAmountOfMoney)
             throw new BanksException("Amount must be greater than zero");
         if (account is null)
             throw new BanksException("Account to transfer money is null");
-        if (_money < 0)
+        if (_money < Constans.MinAmountOfMoney)
         {
-            decimal sum = moneyToTransfer - (_money * (decimal)_comission / 365);
+            decimal sum = moneyToTransfer - (_money * (decimal)_comission / Constans.DaysInYear);
             _money -= sum;
             account.FillUp(moneyToTransfer);
         }
@@ -72,7 +74,7 @@ public class CreditAccount : IBankAccount
 
     public void AddPercent()
     {
-        if (_money < 0)
-            _money -= _money * (decimal)BankBelonging.GetSettings().CommissionForCreditUse / 100;
+        if (_money < Constans.MinAmountOfMoney)
+            _money -= _money * (decimal)BankBelonging.GetSettings().CommissionForCreditUse / Constans.MaxPercent;
     }
 }

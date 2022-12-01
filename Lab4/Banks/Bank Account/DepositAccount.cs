@@ -4,8 +4,6 @@ namespace Banks;
 
 public class DepositAccount : IBankAccount
 {
-    private const decimal MinAmountOfMoney = 0;
-
     private decimal _startedSum;
     private decimal _remainder;
     private DateTime _opening;
@@ -13,6 +11,16 @@ public class DepositAccount : IBankAccount
 
     public DepositAccount(decimal money, Client client, Bank bank, DateTime date, int term)
     {
+        if (money < Constans.MinAmountOfMoney)
+            throw new BanksException("Amount of money is negative");
+        if (client is null)
+            throw new BanksException("Client for deposit account is null");
+        if (bank is null)
+            throw new BanksException("Bank for deposit account is null");
+        if (date == DateTime.MinValue)
+            throw new BanksException("Something is wrong with the date");
+        if (term < Constans.MinTerm)
+            throw new BanksException("Deposit term is too short");
         Id = Guid.NewGuid();
         _startedSum = money;
         _remainder = money;
@@ -41,7 +49,7 @@ public class DepositAccount : IBankAccount
 
     public void Withdraw(decimal moneyToTake)
     {
-        if (moneyToTake <= MinAmountOfMoney)
+        if (moneyToTake <= Constans.MinAmountOfMoney)
             throw new BanksException("Sum must be greater than 0");
         if (moneyToTake > _remainder)
             throw new BanksException("Not enough money to take");
@@ -52,14 +60,14 @@ public class DepositAccount : IBankAccount
 
     public void FillUp(decimal moneyToTopOff)
     {
-        if (moneyToTopOff <= MinAmountOfMoney)
+        if (moneyToTopOff <= Constans.MinAmountOfMoney)
             throw new BanksException("Sum must be greater than 0");
         _remainder += moneyToTopOff;
     }
 
     public void Transfer(decimal moneyToTransfer, IBankAccount account)
     {
-        if (moneyToTransfer <= MinAmountOfMoney)
+        if (moneyToTransfer <= Constans.MinAmountOfMoney)
             throw new BanksException("Sum must be greater than 0");
         if (account is null)
             throw new BanksException("Recipient account is null");
@@ -86,7 +94,7 @@ public class DepositAccount : IBankAccount
             percent = BankBelonging.GetSettings().HighDepositPercentage;
         }
 
-        decimal current = (_remainder / 100) * (decimal)(percent / 365);
+        decimal current = (_remainder / Constans.MaxPercent) * (decimal)(percent / Constans.DaysInYear);
         _remainder += current;
     }
 }

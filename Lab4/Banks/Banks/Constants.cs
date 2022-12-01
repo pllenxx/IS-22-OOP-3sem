@@ -12,4 +12,8 @@ public class Constans
     public const decimal MinMoneyToCreateBank = 100000000;
     public const decimal MinLowDepositSum = 30000;
     public const decimal MinAverageDepositSum = 50000;
+    public const decimal MinAmountOfMoney = 0;
+    public const int DaysInYear = 365;
+    public const int MaxPercent = 100;
+    public const int MinTerm = 1;
 }

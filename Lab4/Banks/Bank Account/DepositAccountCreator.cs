@@ -1,3 +1,4 @@
+using Banks.Tools;
 namespace Banks;
 
 public class DepositAccountCreator : BankAccountCreator
@@ -9,6 +10,16 @@ public class DepositAccountCreator : BankAccountCreator
     public DepositAccountCreator(Bank bank, Client client, decimal amountOfMoney, DateTime date, int time)
         : base(bank, client)
     {
+        if (bank is null)
+            throw new BanksException("Unable to create account with null bank");
+        if (client is null)
+            throw new BanksException("Unable to create account with null client");
+        if (amountOfMoney < Constans.MinAmountOfMoney)
+            throw new BanksException("Unable to create account with negative amount of money");
+        if (date == DateTime.MinValue)
+            throw new BanksException("Something is wrong with the date");
+        if (time < Constans.MinTerm)
+            throw new BanksException("Unable to create account with such short term");
         _money = amountOfMoney;
         _opening = date;
         _term = time;

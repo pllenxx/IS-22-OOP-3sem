@@ -1,13 +1,19 @@
 using Banks.Tools;
+using Microsoft.VisualBasic;
 
 namespace Banks;
 
 public class DebitAccount : IBankAccount
 {
-    private const decimal MinAmountOfMoney = 0;
     private decimal _money;
     public DebitAccount(decimal money, Bank bank, Client client)
     {
+        if (bank is null)
+            throw new BanksException("Bank for debit account is null");
+        if (client is null)
+            throw new BanksException("Client for debit account is null");
+        if (money < Constans.MinAmountOfMoney)
+            throw new BanksException("Unable to create account with negative amount of money");
         Id = Guid.NewGuid();
         _money = money;
         BankBelonging = bank;
@@ -33,7 +39,7 @@ public class DebitAccount : IBankAccount
 
     public void Withdraw(decimal moneyToTake)
     {
-        if (moneyToTake <= MinAmountOfMoney)
+        if (moneyToTake <= Constans.MinAmountOfMoney)
             throw new BanksException("Amount must be greater than zero");
         if (moneyToTake > _money)
             throw new BanksException("Too much money to take");
@@ -42,14 +48,14 @@ public class DebitAccount : IBankAccount
 
     public void FillUp(decimal moneyToTopOff)
     {
-        if (moneyToTopOff <= MinAmountOfMoney)
+        if (moneyToTopOff <= Constans.MinAmountOfMoney)
             throw new BanksException("Amount must be greater than zero");
         _money += moneyToTopOff;
     }
 
     public void Transfer(decimal moneyToTransfer, IBankAccount account)
     {
-        if (moneyToTransfer <= MinAmountOfMoney)
+        if (moneyToTransfer <= Constans.MinAmountOfMoney)
             throw new BanksException("Amount must be greater than zero");
         if (account is null)
             throw new BanksException("Account to transfer money is null");
@@ -61,6 +67,7 @@ public class DebitAccount : IBankAccount
 
     public void AddPercent()
     {
-        _money += _money / 100 * (decimal)(BankBelonging.GetSettings().DebitPercentage / 365);
+        _money += (_money / Constans.MaxPercent) *
+                  (decimal)(BankBelonging.GetSettings().DebitPercentage / Constans.DaysInYear);
     }
 }

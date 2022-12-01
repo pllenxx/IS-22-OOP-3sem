@@ -4,8 +4,12 @@ namespace Banks;
 
 public abstract class BankAccountCreator
 {
-    public BankAccountCreator(Bank bank, Client client)
+    protected BankAccountCreator(Bank bank, Client client)
     {
+        if (bank is null)
+            throw new BanksException("Unable to create account with null bank");
+        if (client is null)
+            throw new BanksException("Unable to create account with null client");
         Client = client;
         BankBelonging = bank;
     }

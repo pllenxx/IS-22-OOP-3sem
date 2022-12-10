@@ -3,6 +3,7 @@ using Backups.Extra.Recover;
 using Backups.Extra.Remover;
 using Backups.Extra.Tools;
 using Newtonsoft.Json;
+using Zio;
 
 namespace Backups.Extra;
 
@@ -13,6 +14,7 @@ public class BackupExtraTask : BackupTask
    private IRestore _restore = null!;
    private ILogger _logger = null!;
    private Merger _merger;
+   private IFileSystem _fileSystem = null!;
    public BackupExtraTask(string name, string path)
       : base(name, path)
    {
@@ -27,11 +29,14 @@ public class BackupExtraTask : BackupTask
       _logger.Logging("Removal algorithm is set");
    }
 
-   public void SetPolicyForSystemRemoval(ISystemRemover remover)
+   public void SetPolicyForSystemRemoval(ISystemRemover remover, IFileSystem fileSystem)
    {
       if (remover is null)
          throw new BackupsExtraException("Remover policy is null");
+      if (fileSystem is null)
+         throw new BackupsExtraException("File system is null");
       _systemRemover = remover;
+      _fileSystem = fileSystem;
       _logger.Logging("Removing from system type is set");
    }
 
@@ -54,7 +59,7 @@ public class BackupExtraTask : BackupTask
    public void ClearRestorePoints()
    {
       var pointsToDelete = _limitAlgo.FindPoints(Backup.GetPoints());
-      _systemRemover.DeletePointsInSystem(pointsToDelete, this, _logger);
+      _systemRemover.DeletePointsInSystem(pointsToDelete, this, _logger, _fileSystem);
    }
 
    public void MergeRestorePoints()

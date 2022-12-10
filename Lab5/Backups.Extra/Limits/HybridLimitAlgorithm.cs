@@ -2,13 +2,13 @@ using Backups.Extra.Tools;
 
 namespace Backups.Extra.Remover;
 
-public class HybridLimitAlgo : ILimitAlgo
+public class HybridLimitAlgorithm : ILimitAlgorithm
 {
-    private AmountLimitAlgo? _byAmountRemover;
-    private DateLimitAlgo? _byDateRemover;
+    private AmountLimitAlgorithm? _byAmountRemover;
+    private DateLimitAlgorithm? _byDateRemover;
     private HybridMode _mode;
 
-    public HybridLimitAlgo(HybridMode mode, AmountLimitAlgo? byAmountRemover, DateLimitAlgo? byDateRemover)
+    public HybridLimitAlgorithm(HybridMode mode, AmountLimitAlgorithm? byAmountRemover, DateLimitAlgorithm? byDateRemover)
     {
         if (byAmountRemover is null && byDateRemover is null)
             throw new BackupsExtraException("Both limit criteria is null");

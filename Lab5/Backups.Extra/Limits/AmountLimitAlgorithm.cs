@@ -2,12 +2,12 @@ using Backups.Extra.Tools;
 
 namespace Backups.Extra.Remover;
 
-public class AmountLimitAlgo : ILimitAlgo
+public class AmountLimitAlgorithm : ILimitAlgorithm
 {
     private const int MinAmountLimit = 0;
     private int _amountLimit;
 
-    public AmountLimitAlgo(int amountLimit)
+    public AmountLimitAlgorithm(int amountLimit)
     {
         if (amountLimit < MinAmountLimit)
             throw new BackupsExtraException("Unable to collect negative amount of restore points");

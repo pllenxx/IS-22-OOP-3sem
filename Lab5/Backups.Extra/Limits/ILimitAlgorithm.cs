@@ -1,6 +1,6 @@
 namespace Backups.Extra.Remover;
 
-public interface ILimitAlgo
+public interface ILimitAlgorithm
 {
     IEnumerable<RestorePoint> FindPoints(IEnumerable<RestorePoint> restorePoints);
 }

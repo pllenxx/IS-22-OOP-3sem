@@ -9,7 +9,7 @@ namespace Backups.Extra;
 
 public class BackupExtraTask : BackupTask
 {
-   private ILimitAlgo _limitAlgo = null!;
+   private ILimitAlgorithm _limitAlgorithm = null!;
    private ISystemRemover _systemRemover = null!;
    private IRestore _restore = null!;
    private ILogger _logger = null!;
@@ -21,11 +21,11 @@ public class BackupExtraTask : BackupTask
       _merger = new Merger();
    }
 
-   public void SetRemovalPolicy(ILimitAlgo remover)
+   public void SetRemovalPolicy(ILimitAlgorithm remover)
    {
       if (remover is null)
          throw new BackupsExtraException("Remover policy is null");
-      _limitAlgo = remover;
+      _limitAlgorithm = remover;
       _logger.Logging("Removal algorithm is set");
    }
 
@@ -58,13 +58,13 @@ public class BackupExtraTask : BackupTask
 
    public void ClearRestorePoints()
    {
-      var pointsToDelete = _limitAlgo.FindPoints(Backup.GetPoints());
+      var pointsToDelete = _limitAlgorithm.FindPoints(Backup.GetPoints());
       _systemRemover.DeletePointsInSystem(pointsToDelete, this, _logger, _fileSystem);
    }
 
    public void MergeRestorePoints()
    {
-      var pointsToMerge = _limitAlgo.FindPoints(Backup.GetPoints());
+      var pointsToMerge = _limitAlgorithm.FindPoints(Backup.GetPoints());
       _merger.Merge(pointsToMerge, this, _logger);
    }
 

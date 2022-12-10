@@ -4,9 +4,9 @@ namespace Backups.Extra.Remover;
 
 public class HybridMode
 {
-    public HybridMode(bool type)
+    public HybridMode(bool isAllLimitsOn)
     {
-        if (type)
+        if (isAllLimitsOn)
         {
             All = true;
             Any = false;

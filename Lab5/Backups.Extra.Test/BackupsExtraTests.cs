@@ -11,8 +11,8 @@ public class BackupsExtraTests
     public void ControlRestorePointsAmount()
     {
         string generalPath = @"/home/";
-        BackupObject obj1 = new BackupObject(@"/bin/ps");
-        BackupObject obj2 = new BackupObject(@"/bin/rmdir");
+        BackupObject obj1 = new BackupObject(@"/bin/chmod");
+        BackupObject obj2 = new BackupObject(@"/bin/date");
         BackupExtraTask task = new BackupExtraTask("task1", generalPath);
         task.SetTypeOfLogging(new ConsoleLogger(), false);
         var fs = new MemoryFileSystem();
@@ -21,10 +21,10 @@ public class BackupsExtraTests
         task.AddObject(obj1);
         task.AddObject(obj2);
         task.AddPoint();
-        BackupObject obj3 = new BackupObject(@"/bin/stty");
+        BackupObject obj3 = new BackupObject(@"/bin/pwd");
         task.AddObject(obj3);
         task.AddPoint();
-        task.SetRemovalPolicy(new AmountLimitAlgo(1));
+        task.SetRemovalPolicy(new AmountLimitAlgorithm(1));
         task.SetPolicyForSystemRemoval(new InMemoryRemover(), fs);
         task.ClearRestorePoints();
         Assert.Equal(1, task.Backup.GetPoints().Count);

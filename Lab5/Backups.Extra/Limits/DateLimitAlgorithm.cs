@@ -2,12 +2,13 @@ using Backups.Extra.Tools;
 
 namespace Backups.Extra.Remover;
 
-public class DateLimitAlgo : ILimitAlgo
+public class DateLimitAlgorithm : ILimitAlgorithm
 {
     private DateTime _dateLimit;
-    public DateLimitAlgo(DateTime dateLimit)
+    public DateLimitAlgorithm(string date)
     {
-        _dateLimit = dateLimit;
+        if (!DateTime.TryParse(date, out _dateLimit))
+            throw new BackupsExtraException("Date for limit is incorrect");
     }
 
     public IEnumerable<RestorePoint> FindPoints(IEnumerable<RestorePoint> restorePoints)

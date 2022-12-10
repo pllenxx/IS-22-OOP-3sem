@@ -19,6 +19,7 @@ public class Storage
         Bytes = bytes;
     }
 
+    public IReadOnlyList<BackupObject> BackupObjects => _backupObjects.AsReadOnly();
     public string Path { get; }
     public IReadOnlyList<byte[]> Bytes { get; }
 

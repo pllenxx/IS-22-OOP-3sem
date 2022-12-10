@@ -7,7 +7,6 @@ public class BackupTask
 {
     private IStorageAlgorithm _algorithm = null!;
     private IRepository _repository = null!;
-    private string _backupPath;
 
     public BackupTask(string backupName, string path)
     {
@@ -16,11 +15,12 @@ public class BackupTask
         if (string.IsNullOrWhiteSpace(path))
             throw new BackupException("Invalid backup path input");
         BackupName = backupName;
-        _backupPath = path;
+        BackupPath = path;
         Objects = new List<BackupObject>();
         Backup = new Backup();
     }
 
+    public string BackupPath { get; private set; }
     public ICollection<BackupObject> Objects { get; private set; }
     public IBackup Backup { get; }
     public string BackupName { get; }
@@ -51,7 +51,7 @@ public class BackupTask
         }
 
         Backup.AddRestorePoint(restorePoint);
-        var directoryPath = Path.Combine(_backupPath, BackupName, restorePoint.Name);
+        var directoryPath = Path.Combine(BackupPath, BackupName, restorePoint.Name);
         _repository.CreateDirectory(directoryPath, storages);
         var config = new Config(Backup, _algorithm, _repository);
         Configuration = config;

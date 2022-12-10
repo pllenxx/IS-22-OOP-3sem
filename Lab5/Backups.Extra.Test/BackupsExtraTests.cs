@@ -11,8 +11,8 @@ public class BackupsExtraTests
     public void ControlRestorePointsAmount()
     {
         string generalPath = @"/home/";
-        BackupObject obj1 = new BackupObject(@"/bin/kill");
-        BackupObject obj2 = new BackupObject(@"/bin/ed");
+        BackupObject obj1 = new BackupObject(@"/bin/link");
+        BackupObject obj2 = new BackupObject(@"/bin/zsh");
         BackupExtraTask task1 = new BackupExtraTask("task 1", generalPath);
         task1.SetTypeOfLogging(new FileLogger(), false);
         task1.SetRepository(new FileSystemRepository(new PhysicalFileSystem()));
@@ -20,7 +20,7 @@ public class BackupsExtraTests
         task1.AddObject(obj1);
         task1.AddObject(obj2);
         task1.AddPoint();
-        BackupObject obj3 = new BackupObject(@"/bin/dash");
+        BackupObject obj3 = new BackupObject(@"/bin/unlink");
         task1.AddObject(obj3);
         task1.AddPoint();
         task1.SetRemovalPolicy(new AmountLimitAlgo(1));

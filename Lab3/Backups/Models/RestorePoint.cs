@@ -15,6 +15,7 @@ public class RestorePoint
         _storages = storages;
     }
 
+    public IReadOnlyList<Storage> Storages => _storages.ToList().AsReadOnly();
     public string Name { get; }
     public DateTime TimeOfCreation { get;  }
 
